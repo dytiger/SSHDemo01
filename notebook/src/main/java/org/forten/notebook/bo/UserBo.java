@@ -1,5 +1,6 @@
 package org.forten.notebook.bo;
 
+import org.forten.notebook.dao.JdbcDao;
 import org.forten.notebook.model.UserForRegist;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,9 +22,9 @@ import java.util.Map;
  * Created by Administrator on 2016/7/26.
  */
 @Service("userBo")
-public class UserBo implements InitializingBean {
-    private DataSource dataSource;
-    private NamedParameterJdbcTemplate jdbcTemplate;
+public class UserBo {
+    @Resource
+    private JdbcDao jdbcDao;
 
     @Transactional
     public int doSave(UserForRegist user){
@@ -39,73 +40,6 @@ public class UserBo implements InitializingBean {
         params.put("lastLoginTime",user.getLastLoginTime());
         params.put("valCode",user.getValCode());
 
-        return jdbcTemplate.update(sql,params);
-    }
-
-    /*@Transactional(readOnly = true)
-    public List<User> queryAll(){
-        String sql = "SELECT id,login_name,email,user_level,status,regist_time,last_login_time " +
-                "FROM test_users ORDER BY regist_time DESC";
-        return jdbcTemplate.query(sql, new RowMapper<User>() {
-            public User mapRow(ResultSet rs, int i) throws SQLException {
-                User u = new User();
-                u.setId(rs.getInt("id"));
-                u.setLoginName(rs.getString("login_name"));
-                u.setRegistTime(rs.getDate("regist_time"));
-                u.setEmail(rs.getString("email"));
-                u.setLastLoginTime(rs.getDate("last_login_time"));
-                u.setPassword("******");
-                u.setStatus(rs.getString("status"));
-                u.setUserLevel(rs.getInt("user_level"));
-                u.setValCode("********");
-
-                return u;
-            }
-        });
-    }
-
-    @Transactional(readOnly = true)
-    public List<User> queryByName(String name){
-        String sql = "SELECT id,login_name,email,user_level,status,regist_time,last_login_time " +
-                "FROM test_users WHERE 1=1 ";
-        if(name!=null&&name.trim().length()>0){
-            sql = sql + "AND login_name LIKE :name ";
-        }
-        sql = sql + "ORDER BY regist_time DESC";
-
-        Map<String,Object> params = new HashMap<String, Object>();
-        if(name!=null&&name.trim().length()>0){
-            params.put("name","%"+name+"%");
-        }
-
-        return jdbcTemplate.query(sql, params,(rs,i)-> {
-                User u = new User();
-                u.setId(rs.getInt("id"));
-                u.setLoginName(rs.getString("login_name"));
-                u.setRegistTime(rs.getDate("regist_time"));
-                u.setEmail(rs.getString("email"));
-                u.setLastLoginTime(rs.getDate("last_login_time"));
-                u.setPassword("******");
-                u.setStatus(rs.getString("status"));
-                u.setUserLevel(rs.getInt("user_level"));
-                u.setValCode("********");
-
-                return u;
-        });
-    }*/
-
-    @Resource
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-        this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
-    }
-
-    public void afterPropertiesSet() {
-        if (dataSource == null) {
-            throw new BeanCreationException("Must set dataSource on ContactDao");
-        }
-        if (jdbcTemplate == null) {
-            throw new BeanCreationException("Null JdbcTemplate on ContactDao");
-        }
+        return jdbcDao.update(sql,params);
     }
 }
